@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "synthetic-apartment-dimensions",
+  "source": {
+    "kind": "image",
+    "assetPath": "assets/plan.svg",
+    "width": 1200,
+    "height": 800,
+    "fingerprint": "synthetic-apartment-v1"
+  },
+  "units": "mm",
+  "fields": [
+    {"id":"D01","kind":"dimension","x":270,"y":145,"orientation":"horizontal","label":"Верхний проём","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D02","kind":"dimension","x":460,"y":145,"orientation":"horizontal","label":"Простенок","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D03","kind":"dimension","x":165,"y":315,"orientation":"vertical","label":"Левое окно","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D04","kind":"dimension","x":510,"y":330,"orientation":"vertical","label":"Внутренняя перегородка","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D05","kind":"dimension","x":735,"y":370,"orientation":"vertical","label":"Дверной проём","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D06","kind":"dimension","x":875,"y":570,"orientation":"horizontal","label":"Нижнее окно 1","unit":"mm","required":true,"sourceConfidence":"confirmed"},
+    {"id":"D07","kind":"dimension","x":1015,"y":570,"orientation":"horizontal","label":"Нижнее окно 2","unit":"mm","required":true,"sourceConfidence":"confirmed"}
+  ],
+  "assumptions": ["The source drawing is synthetic and exists only as a public demonstration asset."]
+}
