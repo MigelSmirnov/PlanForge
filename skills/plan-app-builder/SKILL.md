@@ -9,6 +9,18 @@ This file is an execution contract for coding models.
 
 Build a dedicated application for the exact source supplied by the user. Do not design a platform, generic CAD editor, monorepo, or reusable product unless explicitly requested.
 
+## Golden implementation rule
+
+The code in `template/` and the working `examples/apartment-dimensions/` app are executable references, not loose inspiration.
+
+- Start from the template code.
+- Preserve its working interaction and export behavior unless a requirement forces a change.
+- Do not reimplement proven behavior from memory.
+- Do not simplify completed-value export to bare text over the raster image.
+- When changing the template, rerun the same validation scenarios and compare the result with the reference.
+
+The proven v3-2 behavior is authoritative for fixed dimension placeholders: a completed value is rendered inside an opaque, compact panel positioned over the original `?`. This panel covers the question mark baked into the source image. Printing/PDF must use the same generated completed-plan SVG, not `window.print()` on the application UI.
+
 ## Completion contract
 
 The task is complete only when every required item below exists and every applicable validation check has passed.
@@ -43,10 +55,10 @@ The primary target is a phone or tablet.
 3. Record source width, height, units, interaction points, and uncertainties.
 4. Create `plan-spec.js` using source-document coordinates, never viewport pixels.
 5. Copy the original source into `assets/` without modifying it unless requested.
-6. Generate the app from the specification.
+6. Copy and adapt the proven template; do not rewrite it from scratch.
 7. Run structural, interaction, persistence, export, and responsive-layout tests.
 8. Inspect rendered states at required phone and tablet sizes.
-9. Compare every marker with the source.
+9. Compare every marker and every completed export label with the source.
 10. Fix all failures and rerun the affected tests.
 11. Deliver the app only after the definition of done is satisfied.
 
@@ -98,6 +110,34 @@ Coordinates must be measured in the source document coordinate system.
 - [ ] Reject or warn about incompatible project files.
 - [ ] Remove any visible control that does not have working behavior.
 
+## Exact completed-export contract
+
+For a raster plan where `?` placeholders are already baked into the image:
+
+1. Keep the source image as the export background.
+2. For every completed field, render an opaque panel before the value text.
+3. The panel must be large enough to cover the original question mark at that field.
+4. Render the entered value on top of the panel.
+5. Use the same generated full-document SVG for SVG download and print/PDF.
+6. Never print the live application viewport or toolbar.
+7. Never export completed values as bare transparent text over the original `?`.
+
+Canonical label shape:
+
+```js
+const width = Math.max(48, String(value).length * 13 + 18);
+const label = `
+  <g transform="translate(${field.x} ${field.y})">
+    <rect x="${-width / 2}" y="-16" width="${width}" height="32" rx="7"
+      fill="#f4fff8" stroke="#1f7a45" stroke-width="3"/>
+    <text x="0" y="1" text-anchor="middle" dominant-baseline="central"
+      font-family="Arial,sans-serif" font-size="18" font-weight="700"
+      fill="#1f7a45">${escapedValue}</text>
+  </g>`;
+```
+
+Equivalent styling is allowed only when visual tests prove that the baked-in placeholder is fully hidden without erasing important nearby plan lines.
+
 ## Mobile UI contract
 
 The following are release blockers:
@@ -126,6 +166,9 @@ Create tests appropriate to the generated implementation. At minimum verify:
 - [ ] Values survive reload through local persistence.
 - [ ] Invalid import is rejected with a visible error.
 - [ ] Export uses full source dimensions and includes completed values.
+- [ ] Every completed export group contains an opaque covering shape before its text.
+- [ ] Print/PDF is generated from the completed-plan SVG, not the live UI.
+- [ ] A filled field does not leave the original `?` visible beneath or beside its value.
 - [ ] Document-to-screen and screen-to-document coordinate transforms round-trip within tolerance.
 - [ ] Control rectangles do not overlap at required viewport sizes.
 - [ ] Editor sheet bounds remain inside the viewport.
@@ -150,6 +193,7 @@ At each applicable size inspect:
 - [ ] selected marker
 - [ ] open editor
 - [ ] filled value
+- [ ] exported completed value at 100% crop
 - [ ] toolbar overflow behavior
 - [ ] bottom-sheet or dialog bounds
 - [ ] software-keyboard-safe layout
@@ -161,7 +205,8 @@ At each applicable size inspect:
 - Ask only questions that block a working first version.
 - Do not infer missing real-world dimensions from pixel distances unless scale is reliably calibrated.
 - Do not publish a user's plan in a public repository without explicit permission.
-- Never copy coordinates, field counts, or layout defects from the reference example.
+- Never copy coordinates or field counts from the reference example.
+- Preserve proven template behavior; do not preserve known defects.
 
 ## Definition of done
 
@@ -176,6 +221,8 @@ Before delivery all applicable statements must be true:
 - [ ] Values survive reload.
 - [ ] Invalid or incompatible project data is handled visibly and safely.
 - [ ] Export contains the complete plan and all completed values.
+- [ ] Completed values hide baked-in placeholders exactly as in the proven reference.
+- [ ] Print/PDF contains only the completed plan, not application chrome.
 - [ ] The package supports the intended mobile opening workflow.
 - [ ] All mandatory tests pass, or any unexecuted checks are clearly disclosed.
 - [ ] A validation report is included.
@@ -184,4 +231,4 @@ Read `VALIDATION.md` in the repository root for the required test matrix and rep
 
 ## Reference implementation
 
-Use `examples/apartment-dimensions/` only as a structural reference. Adapt it to the supplied source instead of copying its coordinates, field count, visual layout, or defects.
+Use `template/` as the code baseline and `examples/apartment-dimensions/` as the behavioral reference. Adapt source dimensions, asset, coordinates, labels, and units. Do not replace the reference export pipeline with a new interpretation.
