@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>PlanForge App</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <strong id="title">PlanForge</strong>
+    <span id="progress">0 / 0</span>
+    <button id="fitBtn">Fit</button>
+    <button id="saveBtn">Save JSON</button>
+    <label class="button">Load JSON<input id="loadInput" type="file" accept="application/json" hidden /></label>
+    <button id="exportBtn">Export SVG</button>
+    <button id="printBtn">Print</button>
+    <button id="resetBtn">Reset</button>
+  </header>
+
+  <main id="viewport" aria-label="Plan viewer">
+    <div id="stage">
+      <img id="planImage" alt="Engineering plan" draggable="false" />
+      <div id="overlay"></div>
+    </div>
+  </main>
+
+  <dialog id="editor">
+    <form method="dialog" id="editorForm">
+      <h2 id="fieldLabel">Dimension</h2>
+      <label>Value <input id="valueInput" inputmode="decimal" autocomplete="off" /></label>
+      <div class="dialog-actions">
+        <button value="cancel">Cancel</button>
+        <button id="clearBtn" type="button">Clear</button>
+        <button id="confirmBtn" value="default">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="plan-spec.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
