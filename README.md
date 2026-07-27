@@ -1,8 +1,8 @@
 # PlanForge
 
-PlanForge is a small, model-readable skill for generating a working annotation app from one supplied engineering plan.
+PlanForge is a model-readable execution contract for generating and verifying a small mobile-first annotation app from one supplied engineering plan.
 
-It is intentionally not a CAD platform. A coding model inspects the actual PNG, JPG, SVG, or PDF page, identifies fixed input points, writes a plan specification, adapts the included dependency-free example, verifies marker alignment, and returns a ready-to-run ZIP.
+It is intentionally not a CAD platform. A coding model must inspect the actual PNG, JPG, SVG, or PDF page, identify fixed input points, build the app, run tests, visually inspect mobile layouts, and return a ready-to-open package.
 
 ## Use with a coding model
 
@@ -10,70 +10,93 @@ Give the model this repository URL together with the plan and a direct request s
 
 ```text
 Use the PlanForge skill from this repository.
-Build a minimal working app for the attached plan so I can enter the missing dimensions marked on it.
-Return a ready-to-run ZIP.
+Build a minimal mobile-first app for the attached plan so I can enter the missing dimensions marked on it.
+Run the mandatory tests and include the validation report.
+Return a ready-to-open ZIP.
 ```
 
-The canonical instructions are in:
+Canonical instructions:
 
 ```text
 skills/plan-app-builder/SKILL.md
 ```
 
-The smallest working reference is in:
+Mandatory validation contract:
+
+```text
+VALIDATION.md
+```
+
+Smallest reference implementation:
 
 ```text
 examples/apartment-dimensions/
 ```
 
-## Required output
+## Required delivery
 
 ```text
 output/
 ├── index.html
 ├── styles.css
 ├── app.js
-├── plan-spec.json
+├── plan-spec.js
 ├── assets/
 │   └── plan.<ext>
+├── tests/
+├── VALIDATION-REPORT.md
 └── README.md
 ```
 
 The generated app must:
 
 - use the supplied plan rather than a generic demo;
-- run without npm or a build step;
-- support fixed input markers, pan and zoom;
+- prioritize phone and tablet use;
+- avoid requiring a development server for the normal end-user workflow;
+- support fixed input markers, pan, and pinch zoom;
 - save values locally;
-- import and export editable project JSON;
-- export the complete annotated plan as SVG or through browser print/PDF;
+- import and export editable project data;
+- export the complete annotated plan independently of the current viewport;
 - store coordinates in source-document space;
-- expose uncertain marker positions instead of presenting guesses as confirmed.
+- expose uncertain marker positions honestly;
+- contain no overlapping controls or placeholder buttons;
+- pass the mandatory automated and visual checks, or explicitly disclose unexecuted validation.
 
-## Run the reference example
+## Definition of done
 
-```bash
-python3 -m http.server 8080
-```
+A model must not call the app complete merely because the files exist or the page opens.
 
-Open:
+Completion requires evidence that:
 
-```text
-http://localhost:8080/examples/apartment-dimensions/
-```
+- all visible controls work;
+- the editor remains usable on narrow screens and with the software keyboard;
+- controls do not overlap at the required phone and tablet viewports;
+- values survive reload;
+- invalid import is handled safely;
+- export contains the full plan;
+- coordinate transforms are stable;
+- every marker was compared with the original source;
+- the validation report is included.
+
+See [`VALIDATION.md`](VALIDATION.md) for the full test matrix and reporting format.
 
 ## Repository layout
 
 ```text
 PlanForge/
 ├── skills/plan-app-builder/SKILL.md
+├── VALIDATION.md
 ├── examples/apartment-dimensions/
 ├── template/
 ├── SKILL.md
 └── README.md
 ```
 
-`SKILL.md` at the repository root is a short entry point. The file under `skills/plan-app-builder/` is the canonical version.
+The root `SKILL.md` is a short entry point. The file under `skills/plan-app-builder/` is the canonical execution contract.
+
+## Development-only reference launch
+
+The included example may be served during development with any static server. This is a developer convenience, not the required mobile user workflow.
 
 ## License
 
