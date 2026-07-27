@@ -14,10 +14,41 @@ A generated application is not complete merely because its files exist or its fi
 | Gestures | pan works; pinch zoom works; gestures do not accidentally activate markers or buttons |
 | Persistence | saved values survive reload; reset removes only intended data; incompatible data is rejected or warned about |
 | Import | valid project data loads; malformed JSON and wrong-plan data produce a visible error without corrupting current state |
-| Export | uses full source dimensions; includes completed values; is independent of current pan and zoom |
+| Export | uses full source dimensions; includes completed values; is independent of current pan and zoom; completed labels use opaque panels that cover baked-in placeholders; print/PDF uses the generated completed-plan SVG rather than the live UI |
 | Geometry | screen/document transforms round-trip within tolerance; markers remain aligned after resize and orientation change |
 | Runtime | main flow produces no uncaught exceptions or unhandled promise rejections |
 | Source review | every generated marker is visually compared with the supplied plan; uncertain points are labelled as uncertain |
+
+## Golden export regression
+
+The proven v3-2 result is the behavioral baseline for fixed raster placeholders.
+
+For every completed field, the exported SVG must contain this paint order:
+
+```text
+source image
+→ opaque covering panel
+→ entered value text
+```
+
+The export fails validation when any of these are true:
+
+- the value is rendered as bare text over the source image;
+- the original `?` remains visible beneath or beside the entered value;
+- printing calls `window.print()` on the live application page;
+- toolbar, dialogs, markers, or viewport clipping appear in PDF output;
+- the exported result depends on current pan or zoom;
+- the covering panel erases important nearby plan geometry.
+
+Required regression checks:
+
+1. Fill at least one short value and one long value.
+2. Generate the completed SVG.
+3. Assert that every completed field group contains an opaque `rect` or equivalent covering shape before its `text` node.
+4. Assert that the SVG width, height, and viewBox equal the source dimensions.
+5. Render 100% crops around completed fields and compare them with the expected reference behavior.
+6. Confirm visually that no original placeholder is visible in completed field regions.
+7. Trigger print/PDF and confirm it renders the same completed SVG without application chrome.
 
 ## Required viewport set
 
@@ -85,7 +116,9 @@ Each generated app must include a short report with this structure:
 - PASS/FAIL — control actions
 - PASS/FAIL — persistence
 - PASS/FAIL — import rejection
-- PASS/FAIL — export
+- PASS/FAIL — export structure
+- PASS/FAIL — placeholder-cover regression
+- PASS/FAIL — print/PDF clean-output regression
 - PASS/FAIL — coordinate transforms
 - PASS/FAIL — responsive overlap checks
 - PASS/FAIL — smoke flow
@@ -97,6 +130,7 @@ Each generated app must include a short report with this structure:
 - PASS/FAIL — 412 × 915
 - PASS/FAIL — 768 × 1024
 - PASS/FAIL — phone landscape
+- PASS/FAIL — completed-field export crops
 
 ## Source alignment
 - Confirmed fields:
