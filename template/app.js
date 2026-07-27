@@ -118,7 +118,7 @@
   }, { passive: false });
 
   document.getElementById('fitBtn').addEventListener('click', fit);
-  document.getElementById('printBtn').addEventListener('click', () => window.print());
+  document.getElementById('printBtn').addEventListener('click', printCompletedPlan);
   document.getElementById('resetBtn').addEventListener('click', () => {
     if (!confirm('Clear all entered values?')) return;
     for (const key of Object.keys(values)) delete values[key];
@@ -140,10 +140,31 @@
   });
 
   document.getElementById('exportBtn').addEventListener('click', () => {
-    const labels = spec.fields.filter(field => values[field.id]).map(field => `<text x="${field.x}" y="${field.y}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#087a55" stroke="white" stroke-width="5" paint-order="stroke">${escapeXml(values[field.id])}</text>`).join('');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${spec.source.width}" height="${spec.source.height}" viewBox="0 0 ${spec.source.width} ${spec.source.height}"><image href="${spec.source.assetPath}" width="${spec.source.width}" height="${spec.source.height}"/>${labels}</svg>`;
-    download('completed-plan.svg', svg, 'image/svg+xml');
+    download('completed-plan.svg', buildCompletedSvg(), 'image/svg+xml');
   });
+
+  // Golden export behavior from the proven v3-2 app:
+  // each completed value is rendered inside an opaque light panel. The panel
+  // deliberately covers a question mark baked into the raster source while
+  // preserving the surrounding plan. Do not replace this with bare text.
+  function buildCompletedSvg() {
+    const labels = spec.fields.filter(field => values[field.id]).map(field => {
+      const value = escapeXml(values[field.id]);
+      const width = Math.max(48, String(value).length * 13 + 18);
+      return `<g data-field-id="${escapeXml(field.id)}" transform="translate(${field.x} ${field.y})"><rect x="${-width / 2}" y="-16" width="${width}" height="32" rx="7" fill="#f4fff8" stroke="#1f7a45" stroke-width="3"/><text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#1f7a45">${value}</text></g>`;
+    }).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${spec.source.width}" height="${spec.source.height}" viewBox="0 0 ${spec.source.width} ${spec.source.height}"><image href="${escapeXml(spec.source.assetPath)}" width="${spec.source.width}" height="${spec.source.height}"/>${labels}</svg>`;
+  }
+
+  function printCompletedPlan() {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Allow pop-ups to print the completed plan.');
+      return;
+    }
+    popup.document.write(`<title>Completed plan</title><style>html,body{margin:0}svg{display:block;width:100%;height:auto}@media print{@page{size:landscape;margin:8mm}}</style>${buildCompletedSvg()}<script>onload=()=>print()<\/script>`);
+    popup.document.close();
+  }
 
   function download(name, content, type) {
     const link = document.createElement('a');
