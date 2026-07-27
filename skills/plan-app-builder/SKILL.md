@@ -1,60 +1,56 @@
 ---
 name: plan-app-builder
-description: Build a small working mobile-first offline web application for one supplied engineering plan, drawing, scan, photo, SVG, or PDF. Use when a user wants to enter missing dimensions or other fixed values directly on a specific plan and receive a ready-to-open ZIP.
+description: Build and verify a small mobile-first offline web application for one supplied engineering plan, drawing, scan, photo, SVG, or PDF. Use when a user wants a ready-to-open app for entering fixed dimensions or notes directly on a specific plan.
 ---
 
 # Plan App Builder
 
-Build a dedicated application for the supplied source. Do not design a platform, generic CAD editor, monorepo, or reusable product unless the user explicitly asks for one.
+This file is an execution contract for coding models.
+
+Build a dedicated application for the exact source supplied by the user. Do not design a platform, generic CAD editor, monorepo, or reusable product unless explicitly requested.
+
+## Completion contract
+
+The task is complete only when every required item below exists and every applicable validation check has passed.
+
+### Required delivery
+
+- [ ] `index.html`
+- [ ] `styles.css`
+- [ ] `app.js`
+- [ ] `plan-spec.js`
+- [ ] `assets/plan.<ext>`
+- [ ] `README.md`
+- [ ] automated test files
+- [ ] a ZIP or working folder containing the complete app
+- [ ] a validation report listing tests run, results, screenshots inspected, and any unverified items
+
+Use plain HTML, CSS, and JavaScript by default. Do not add npm, frameworks, build steps, databases, authentication, cloud services, or a backend unless genuinely required by the user's task.
 
 ## Primary target
 
-The primary target is a phone or tablet. The generated app must be usable without requiring the end user to run a development server.
+The primary target is a phone or tablet.
 
-Prefer a self-contained static package that can be opened directly from local files. If browser restrictions make a feature unavailable under `file://`, the app must degrade safely and the limitation must be stated. Do not make `python3 -m http.server` the default user workflow.
+- [ ] The end user does not need to run a development server for the normal workflow.
+- [ ] The delivered package opens locally where browser capabilities permit.
+- [ ] Features blocked under `file://` degrade safely and are documented.
+- [ ] A local HTTP server may be used for development and testing, but must not be presented as the main mobile user workflow.
 
-## Required result
+## Required workflow
 
-Return a working folder or ZIP containing:
-
-```text
-index.html
-styles.css
-app.js
-assets/plan.<ext>
-plan-spec.js
-README.md
-```
-
-Use plain HTML, CSS, and JavaScript by default. Avoid npm, frameworks, build steps, databases, authentication, and cloud services unless genuinely required.
-
-## Workflow
-
-1. Inspect the actual supplied plan at sufficient resolution.
-2. Identify the exact user operation.
+1. Inspect the supplied plan at sufficient resolution.
+2. Determine the exact user operation.
 3. Record source width, height, units, interaction points, and uncertainties.
-4. Create `plan-spec.js` with source-document coordinates, never screen coordinates.
-5. Copy the source into `assets/` without modifying it unless requested.
-6. Generate the application from the specification.
-7. Run automated structural and interaction tests.
-8. Visually verify the app at phone and tablet viewport sizes.
+4. Create `plan-spec.js` using source-document coordinates, never viewport pixels.
+5. Copy the original source into `assets/` without modifying it unless requested.
+6. Generate the app from the specification.
+7. Run structural, interaction, persistence, export, and responsive-layout tests.
+8. Inspect rendered states at required phone and tablet sizes.
 9. Compare every marker with the source.
-10. Deliver the working ZIP, not only a proposal or mockup.
+10. Fix all failures and rerun the affected tests.
+11. Deliver the app only after the definition of done is satisfied.
 
-## Mobile interaction requirements
-
-- Use a mobile-first layout.
-- Respect safe-area insets.
-- No toolbar button may overlap another control at 320, 360, 390, 412, and 768 CSS px widths.
-- Touch targets must be at least 44 × 44 CSS px.
-- Toolbars must wrap, scroll, collapse, or move into a menu instead of overlapping.
-- Popovers and sheets must remain fully visible inside the viewport.
-- On narrow screens, use a bottom sheet instead of a floating card where practical.
-- The software keyboard must not hide the active input or action buttons.
-- Pinch zoom and one-finger pan must not trigger annotation buttons accidentally.
-- A visible control must always have a working event handler or be removed.
-
-## Minimal specification
+## Minimal plan specification
 
 ```js
 window.PLAN_SPEC = {
@@ -85,77 +81,107 @@ window.PLAN_SPEC = {
 };
 ```
 
-## Application behavior
+Coordinates must be measured in the source document coordinate system.
 
-For a fixed set of fields, implement only what is needed:
+## Required application behavior
 
-- plan image with an SVG overlay;
-- tap a marker to enter a value;
-- decimal numeric keyboard on mobile;
-- previous and next field navigation;
-- completed-field progress;
-- pan and zoom, including pinch zoom;
-- autosave to `localStorage`;
-- editable project export and import as JSON;
-- completed full-document export as SVG or browser print/PDF;
-- exports independent of the current viewport transform.
+- [ ] Render the source without distortion.
+- [ ] Place tappable markers using the plan specification.
+- [ ] Open a compact value editor when a marker is tapped.
+- [ ] Use decimal-friendly mobile input.
+- [ ] Support save, cancel, previous field, and next field.
+- [ ] Show empty, selected, invalid, and completed states.
+- [ ] Support one-finger pan and pinch zoom without accidental marker activation.
+- [ ] Autosave values locally.
+- [ ] Import and export editable project JSON.
+- [ ] Export the complete annotated plan, independent of the current pan and zoom.
+- [ ] Reject or warn about incompatible project files.
+- [ ] Remove any visible control that does not have working behavior.
+
+## Mobile UI contract
+
+The following are release blockers:
+
+- controls overlap;
+- icons or buttons cover one another;
+- a toolbar extends beyond the viewport without wrapping, scrolling, collapsing, or moving into a menu;
+- an editor card or sheet renders partly outside the viewport;
+- the software keyboard hides the active input or primary action buttons;
+- any touch target is smaller than 44 × 44 CSS px;
+- safe-area insets are ignored;
+- a popover is used on a narrow screen when a viewport-safe bottom sheet is required;
+- pan or pinch gestures accidentally activate controls;
+- a visible button has no working event handler.
 
 ## Mandatory automated tests
 
 Create tests appropriate to the generated implementation. At minimum verify:
 
-1. `plan-spec` parses and every field ID is unique.
-2. Every field lies inside source bounds.
-3. Required DOM elements exist.
-4. Every visible button has a registered action.
-5. Opening a field editor, saving, cancelling, previous, and next work.
-6. Values survive reload through `localStorage`.
-7. Invalid import is rejected with a visible error.
-8. Export contains the full source dimensions and completed values.
-9. Coordinate transforms round-trip within tolerance.
-10. No control rectangles overlap at required mobile viewport widths.
-11. The editor sheet remains inside the viewport at required widths and heights.
-12. A smoke test completes the main flow without uncaught exceptions.
+- [ ] `plan-spec` parses successfully.
+- [ ] Every field ID is unique.
+- [ ] Every field lies inside source bounds.
+- [ ] Required DOM elements exist.
+- [ ] Every visible button is enabled intentionally and has a registered action.
+- [ ] Field editor open, save, cancel, previous, and next work.
+- [ ] Values survive reload through local persistence.
+- [ ] Invalid import is rejected with a visible error.
+- [ ] Export uses full source dimensions and includes completed values.
+- [ ] Document-to-screen and screen-to-document coordinate transforms round-trip within tolerance.
+- [ ] Control rectangles do not overlap at required viewport sizes.
+- [ ] Editor sheet bounds remain inside the viewport.
+- [ ] The main user flow completes without uncaught exceptions.
 
-Do not mark the build complete if tests were not run. If browser automation is unavailable, provide the test files and clearly state which tests could not be executed.
+Do not claim that the app is complete when tests were not run. When browser automation is unavailable, still provide the tests and explicitly list every test that remains unexecuted.
 
-## Visual verification
+## Required visual verification
 
-Capture or inspect rendered states at minimum for:
+Inspect rendered states at minimum at:
 
-- 320 × 568;
-- 360 × 800;
-- 390 × 844;
-- 412 × 915;
-- 768 × 1024.
+- [ ] 320 × 568
+- [ ] 360 × 800
+- [ ] 390 × 844
+- [ ] 412 × 915
+- [ ] 768 × 1024
+- [ ] at least one phone landscape viewport
 
-Verify empty state, selected marker, open editor, filled value, toolbar overflow, landscape orientation, and software-keyboard-safe layout.
+At each applicable size inspect:
+
+- [ ] empty state
+- [ ] selected marker
+- [ ] open editor
+- [ ] filled value
+- [ ] toolbar overflow behavior
+- [ ] bottom-sheet or dialog bounds
+- [ ] software-keyboard-safe layout
 
 ## Source interpretation rules
 
 - Treat OCR and computer-vision output as provisional until visually checked.
 - Mark estimated positions as `probable` or `manual`; never present guesses as confirmed.
 - Ask only questions that block a working first version.
-- Do not infer missing dimensions from pixel distances unless scale is reliably calibrated.
+- Do not infer missing real-world dimensions from pixel distances unless scale is reliably calibrated.
 - Do not publish a user's plan in a public repository without explicit permission.
+- Never copy coordinates, field counts, or layout defects from the reference example.
 
-## Acceptance checks
+## Definition of done
 
-Before delivery verify that:
+Before delivery all applicable statements must be true:
 
-- every field maps to an intended source location;
-- field IDs are unique;
-- all coordinates lie inside the source document;
-- markers remain aligned after pan, zoom, resize, and orientation change;
-- controls do not overlap on supported mobile sizes;
-- all visible buttons work;
-- the editor cannot render outside the viewport;
-- entered values survive reload;
-- incompatible project JSON is rejected or warned about;
-- export includes the complete plan and all completed values;
-- the app opens directly from the delivered package where supported;
-- all mandatory tests pass, or unexecuted tests are explicitly disclosed.
+- [ ] Every field maps to an intended source location.
+- [ ] Marker uncertainty is represented honestly.
+- [ ] Markers remain aligned after pan, zoom, resize, and orientation change.
+- [ ] Controls do not overlap on supported mobile sizes.
+- [ ] All visible buttons work.
+- [ ] The editor remains fully inside the viewport.
+- [ ] Values survive reload.
+- [ ] Invalid or incompatible project data is handled visibly and safely.
+- [ ] Export contains the complete plan and all completed values.
+- [ ] The package supports the intended mobile opening workflow.
+- [ ] All mandatory tests pass, or any unexecuted checks are clearly disclosed.
+- [ ] A validation report is included.
+
+Read `VALIDATION.md` in the repository root for the required test matrix and reporting format.
 
 ## Reference implementation
 
-Use `examples/apartment-dimensions/` only as a structural reference. Adapt it to the supplied source instead of copying its coordinates, field count, or layout defects.
+Use `examples/apartment-dimensions/` only as a structural reference. Adapt it to the supplied source instead of copying its coordinates, field count, visual layout, or defects.
